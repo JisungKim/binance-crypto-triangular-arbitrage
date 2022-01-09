@@ -11,6 +11,7 @@ import socketSubscribe from "$lib/socket";
 
 import ResultsTable from "$lib/winners-table.svelte";
 import DetailModal from "$lib/detail.svelte";
+import { makeTriangularOrder } from '$lib/exchange';
 
 let modalDetail = false;
 let contentModal = {};
@@ -43,7 +44,7 @@ const INTERVAL = 50;
 onMount( async () => {
   const socket = await socketSubscribe();
   const { hashMarket, pairs: allPairs } = await buildPairs();
-
+  var tested = false;
   info.currentStatus = "Connecting to binance";
 
   info.pairslen = allPairs.length;
@@ -106,6 +107,35 @@ onMount( async () => {
 
         winners = w;
         console.log( winners );
+
+        for (var i = 0; i < winners.length; i++) {
+          //if (true) {
+          if (winners[i].chain[0] == "USDT") {
+            const pair_1 = {
+              "market": winners[i].orders[0]["market"],
+              "side": winners[i].orders[0]["side"],
+              "amount": winners[i].orders[0]["amount"],
+              "price": winners[i].orders[0]["price"]
+            };
+            const pair_2 = {
+              "market": winners[i].orders[1]["market"],
+              "side": winners[i].orders[1]["side"],
+              "amount": winners[i].orders[1]["amount"],
+              "price": winners[i].orders[1]["price"]
+            };
+            const pair_3 = {
+              "market": winners[i].orders[2]["market"],
+              "side": winners[i].orders[2]["side"],
+              "amount": winners[i].orders[1]["amount"],
+              "price": winners[i].orders[1]["price"]
+            };
+if (!tested) {
+tested = true;
+            makeTriangularOrder(pair_1, pair_2, pair_3);
+}
+          }
+        }
+
         w.forEach( e => {
 
           e.time = dayjs().format();
